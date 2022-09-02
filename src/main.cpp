@@ -1,5 +1,5 @@
-#include <string>
 #include "client.h"
+#include <string>
 
 int main() {
   dcached::Client client{};

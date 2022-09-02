@@ -1,14 +1,15 @@
 #include "client.h"
-#include <iostream>
-#include <optional>
-#include <tuple>
 #include "constants.h"
 #include "file_handler.h"
 #include "utility.h"
+#include <iostream>
+#include <optional>
+#include <tuple>
 
 namespace {
 
-std::tuple<dcached::constants::ACTION, std::string, std::string> get_user_input(std::istream& is) {
+std::tuple<dcached::constants::ACTION, std::string, std::string> get_user_input(
+    std::istream& is) {
   std::string action;
   std::string key;
   std::string data;
