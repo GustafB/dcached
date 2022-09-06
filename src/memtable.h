@@ -8,7 +8,7 @@
 namespace {
 
 template <typename T>
-std::vector<char> dump_to_vec(T&& container) {
+std::vector<char> map_to_vec(T&& container) {
   std::vector<char> buffer;
   for (auto& [key, value] : container) {
     for (char c : key) buffer.push_back(c);
@@ -68,7 +68,7 @@ template <typename K, typename V>
 void MemTable<K, V>::dump_to_sstable() {
   std::map<K, V> newmap;
   std::swap(_container, newmap);
-  auto buffer = dump_to_vec(newmap);
+  auto buffer = map_to_vec(newmap);
   _file_handler.append_buffer(buffer);
 }
 
@@ -79,10 +79,7 @@ void MemTable<K, V>::populate_from_log(std::string const& log_path) {
   std::ifstream is{log_path};
   std::string record;
   while (std::getline(is, record, ',')) {
-    auto action = util::charToAction(record[0]);
-    auto dpos = record.find('|', 2);
-    auto key = std::string{std::begin(record) + 2, std::begin(record) + dpos};
-    auto value = std::string{std::begin(record) + dpos + 1, std::end(record)};
+    auto [action, key, value] = util::split_key_value_record(record);
     switch (action) {
       case constants::ACTION::SET:
       _container.insert_or_assign(key, value);

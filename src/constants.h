@@ -5,9 +5,9 @@
 namespace dcached {
 namespace constants {
 
-constexpr char sst_log[]{"/tmp/dcached_sst_%d"};
-constexpr char default_log[]{"dcached.log"};
-constexpr char outdir[]{"/tmp/dcached/dcached.log"};
+constexpr char sst_log[]{"dcached_sst_{}"};
+constexpr char default_log[]{"dcached_{}.log"};
+constexpr char outdir[]{"/tmp/dcached/"};
 
 enum class ACTION {
   SET = 0,
