@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.20)
 
 project(dcached VERSION 0.0
                 DESCRIPTION "persistent in-memory cache"

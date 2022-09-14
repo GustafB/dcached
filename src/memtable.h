@@ -1,9 +1,15 @@
 #pragma once
 
 #include "file_handler.h"
+#include "constants.h"
+#include "utility.h"
+
 #include <iterator>
 #include <map>
 #include <optional>
+#include <vector>
+#include <string>
+#include <fstream>
 
 namespace {
 
@@ -38,7 +44,9 @@ class MemTable {
   void dump_to_sstable();
 
   std::map<K, V> _container;
-  FileManager<K, V> _file_handler;
+  FileManager _file_handler;
+
+  unsigned long _data_size;
 };
 
 template <typename K, typename V>
@@ -48,14 +56,16 @@ MemTable<K, V>::MemTable() {
 
 template <typename K, typename V>
 void MemTable<K, V>::set(K const& key, V const& value) {
-  _file_handler.append_to_log(constants::ACTION::SET, key, value);
+  auto record = util::concatenate(std::to_string(static_cast<int>(constants::ACTION::SET)), key, value);
+  _file_handler.append_to_log(record.c_str(), record.size());
   _container.insert_or_assign(key, value);
 }
 
 template <typename K, typename V>
 void MemTable<K, V>::del(K const& key) {
+  auto record = util::concatenate(std::to_string(static_cast<int>(constants::ACTION::DEL)), key);
+  _file_handler.append_to_log(record.c_str(), record.size());
   _container.erase(key);
-  _file_handler.append_to_log(constants::ACTION::DEL, key);
 }
 
 template <typename K, typename V>
@@ -68,7 +78,7 @@ template <typename K, typename V>
 void MemTable<K, V>::dump_to_sstable() {
   std::map<K, V> newmap;
   std::swap(_container, newmap);
-  auto buffer = map_to_vec(newmap);
+  std::vector<char> buffer = map_to_vec(newmap);
   _file_handler.append_buffer(buffer);
 }
 

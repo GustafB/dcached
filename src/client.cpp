@@ -1,6 +1,5 @@
 #include "client.h"
 #include "constants.h"
-#include "file_handler.h"
 #include "utility.h"
 #include <iostream>
 #include <optional>

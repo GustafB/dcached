@@ -2,15 +2,15 @@
 
 #include "constants.h"
 #include "utility.h"
+
 #include <array>
 #include <fstream>
-#include <format>
 #include <iostream>
 #include <string>
-#include <string_view>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
+#include <cassert>
 
 namespace {
 
@@ -43,66 +43,33 @@ std::string compact_log(std::string const& old_path, std::string const& new_path
 
 namespace dcached {
 
-template <typename T, typename V>
 class FileManager {
  public:
   FileManager()
-      : _default_log{constants::outdir, std::fstream::in | std::fstream::out |
-    std::fstream::app} {}
+      : _default_log{constants::outdir, std::fstream::in | std::fstream::out | std::fstream::app} {
+    assert(_default_log.is_open());
+  }
 
   // write routines
-  void append_to_log(constants::ACTION action, T const& key, V const& value);
-  void append_to_log(constants::ACTION action, T const& key);
   template <int N>
-  void append_buffer(std::array<char, N> buf);
-  void append_buffer(std::vector<char> buf);
+  std::ofstream& append_buffer(std::array<char, N> buf);
+  std::ofstream& append_buffer(std::vector<char> buf);
+  std::ofstream& append_to_log(const char* buf, std::size_t buf_sz);
 
   // read routines
+
  private:
-  void _append_to_file(std::string_view str, std::ofstream& file_handle);
+  std::ofstream& _append_to_file(const char* buf, std::size_t buf_sz, std::ofstream& file_handle);
   void _roll_log_file();
 
+  const char* _current_log;
   std::ofstream _default_log;
   std::vector<std::string> _historical_logs;
 };
 
-template <typename T, typename V>
 template <int N>
-void FileManager<T, V>::append_buffer(std::array<char, N> buf) {
-  _append_to_file(buf.data(), std::ofstream{"/tmp/sstable.log"});
+std::ofstream& FileManager::append_buffer(std::array<char, N> buf) {
+  return _append_to_file(buf.data(), buf.size(), std::ofstream{"/tmp/sstable.log"});
 }
-
-template <typename T, typename V>
-void FileManager<T, V>::append_buffer(std::vector<char> buf) {
-  _append_to_file(buf.data(), _default_log);
-}
-
-template <typename T, typename V>
-void FileManager<T, V>::append_to_log(constants::ACTION action, T const& key,
-                                      V const& value) {
-  auto record = util::concatenate(std::to_string(static_cast<int>(action)), "|",
-                                  key, "|", value);
-  _append_to_file(record, _default_log);
-}
-
-template <typename T, typename V>
-void FileManager<T, V>::append_to_log(constants::ACTION action, T const& key) {
-  auto record =
-      util::concatenate(std::to_string(static_cast<int>(action)), "|", key);
-  _append_to_file(record, _default_log);
-}
-
-template <typename T, typename V>
-void FileManager<T, V>::_append_to_file(std::string_view str,
-                                        std::ofstream& file_handle) {
-  file_handle << str << ',';
-}
-
-template <typename T, typename V>
-void FileManager<T, V>::_roll_log_file() {
-  new_log = std::format(constants::default_log, 1);
-}
-
-
 
 }  // namespace dcached
