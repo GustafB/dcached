@@ -52,5 +52,21 @@ std::string join_key_value_record(constants::ACTION action, const std::string& k
   return concatenate(actionToString(action), "|", key, "|", value);
 }
 
+int parse_log_number(const std::string& log_file) {
+  // we already know log format so
+  // no need for this to be generic
+  auto b = log_file.find_last_of('_') + 1;
+  auto e = log_file.find_last_of('.');
+  return std::atoi(log_file.substr(b, e - b).c_str());
+}
+
+
+std::string generate_log_file_name(const char* fmt, int n) {
+  char new_log[100];
+  std::snprintf(new_log, sizeof(new_log), fmt, n);
+  return new_log;
+}
+
+
 }  // namespace util
 }  // namespace dcached

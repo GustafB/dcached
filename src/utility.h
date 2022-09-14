@@ -22,5 +22,9 @@ std::tuple<constants::ACTION, std::string, std::string> split_key_value_record(c
 
 std::string join_key_value_record(constants::ACTION action, const std::string& key, const std::string& value);
 
+int parse_log_number(const std::string& log_file);
+
+std::string generate_log_file_name(const char* fmt, int n);
+
 }  // namespace util
 }  // namespace dcached

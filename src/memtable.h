@@ -84,9 +84,9 @@ void MemTable<K, V>::dump_to_sstable() {
 
 template <typename K, typename V>
 void MemTable<K, V>::populate_from_log(std::string const& log_path) {
-  // TODO: add record byte size to log
-  //       and use seekg
-  std::ifstream is{log_path};
+  // THIS NO LONGER WORKS AS WE WRITE BYTES
+  // INSTEAD OF COMMA SEPARATED STRINGS
+  std::ifstream is{_file_handler.get_active_wal()};
   std::string record;
   while (std::getline(is, record, ',')) {
     auto [action, key, value] = util::split_key_value_record(record);
