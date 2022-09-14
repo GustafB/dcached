@@ -2,6 +2,7 @@ add_library(dcached_impl
             client.cpp
             client.h
             constants.h
+            file_handler.cpp
             file_handler.h
             memtable.h
             utility.cpp

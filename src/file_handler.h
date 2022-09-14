@@ -39,6 +39,8 @@ std::string compact_log(std::string const& old_path, std::string const& new_path
   return "";
 }
 
+
+
 }  // namespace
 
 namespace dcached {
@@ -60,7 +62,7 @@ class FileManager {
 
  private:
   std::ofstream& _append_to_file(const char* buf, std::size_t buf_sz, std::ofstream& file_handle);
-  void _roll_log_file();
+  std::string roll_wal();
 
   const char* _current_log;
   std::ofstream _default_log;
