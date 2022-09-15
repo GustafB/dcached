@@ -1,14 +1,17 @@
 #include "client.h"
-#include "constants.h"
-#include "utility.h"
+
 #include <iostream>
 #include <optional>
 #include <tuple>
 
+#include "constants.h"
+#include "utility.h"
+
 namespace {
 
 std::tuple<dcached::constants::ACTION, std::string, std::string> get_user_input(
-    std::istream& is) {
+    std::istream& is)
+{
   std::string action;
   std::string key;
   std::string data;
@@ -23,7 +26,8 @@ std::tuple<dcached::constants::ACTION, std::string, std::string> get_user_input(
 
 namespace dcached {
 
-void Client::run_loop() {
+void Client::run_loop()
+{
   while (std::cin) {
     auto [action, key, value] = get_user_input(std::cin);
     switch (action) {

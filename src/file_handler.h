@@ -1,26 +1,28 @@
 #pragma once
 
-#include "constants.h"
-#include "utility.h"
-
 #include <array>
+#include <cassert>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
-#include <cassert>
-#include <filesystem>
+
+#include "constants.h"
+#include "utility.h"
 
 namespace {
 
 using Record = std::tuple<dcached::constants::ACTION, std::string, std::string>;
 namespace fs = std::filesystem;
 
-std::string compact_log(std::string const& old_path, std::string const& new_path) {
-  std::ifstream old_log { old_path };
-  std::ofstream new_log { new_path };
+std::string compact_log(std::string const& old_path,
+                        std::string const& new_path)
+{
+  std::ifstream old_log{old_path};
+  std::ofstream new_log{new_path};
   std::unordered_map<std::string, Record> map;
   std::string record;
   while (std::getline(old_log, record)) {
@@ -41,7 +43,8 @@ std::string compact_log(std::string const& old_path, std::string const& new_path
   return "";
 }
 
-std::string initialize_log_dir() {
+std::string initialize_log_dir()
+{
   const fs::path system_dir_path{dcached::constants::outdir};
   if (!fs::exists(system_dir_path)) {
     fs::create_directory(system_dir_path);
@@ -49,7 +52,8 @@ std::string initialize_log_dir() {
   return system_dir_path.string();
 }
 
-std::string find_current_log(const std::string& log_fmt) {
+std::string find_current_log(const std::string& log_fmt)
+{
   initialize_log_dir();
   auto cmpend = log_fmt.find_last_of('_');
   auto cmpstart = sizeof(dcached::constants::outdir) - 1;
@@ -58,12 +62,15 @@ std::string find_current_log(const std::string& log_fmt) {
   int log_file_number = 0;
   for (auto& log_file : fs::directory_iterator{system_dir_path}) {
     auto file_name = log_file.path().string();
-    auto cmp = file_name.substr(cmpstart, file_name.find_last_of('_') - cmpstart);
+    auto cmp =
+        file_name.substr(cmpstart, file_name.find_last_of('_') - cmpstart);
     if (cmp == cmpstr) {
-      log_file_number = std::max(log_file_number, dcached::util::parse_log_number(file_name));
+      log_file_number =
+          std::max(log_file_number, dcached::util::parse_log_number(file_name));
     }
   }
-  return dcached::util::generate_log_file_name(log_fmt.c_str(), log_file_number);
+  return dcached::util::generate_log_file_name(log_fmt.c_str(),
+                                               log_file_number);
 }
 
 }  // namespace
@@ -71,11 +78,13 @@ std::string find_current_log(const std::string& log_fmt) {
 namespace dcached {
 
 class FileManager {
- public:
-  FileManager():
-      _current_log{constants::outdir + find_current_log(constants::default_log)}
+public:
+  FileManager()
+      : _current_log{constants::outdir +
+                     find_current_log(constants::default_log)}
   {
-    _default_log = std::ofstream{_current_log, std::fstream::out | std::fstream::app};
+    _default_log =
+        std::ofstream{_current_log, std::fstream::out | std::fstream::app};
     assert(_default_log.is_open());
   }
 
@@ -90,8 +99,9 @@ class FileManager {
   // utils
   std::string get_active_wal();
 
- private:
-  std::ofstream& _append_to_file(const char* buf, std::size_t buf_sz, std::ofstream& file_handle);
+private:
+  std::ofstream& _append_to_file(const char* buf, std::size_t buf_sz,
+                                 std::ofstream& file_handle);
   std::string roll_wal(const std::string& current_log, const char* fmt);
 
   std::string _current_log;
@@ -99,8 +109,10 @@ class FileManager {
 };
 
 template <int N>
-std::ofstream& FileManager::append_buffer(std::array<char, N> buf) {
-  return _append_to_file(buf.data(), buf.size(), std::ofstream{"/tmp/sstable.log"});
+std::ofstream& FileManager::append_buffer(std::array<char, N> buf)
+{
+  return _append_to_file(buf.data(), buf.size(),
+                         std::ofstream{"/tmp/sstable.log"});
 }
 
 }  // namespace dcached

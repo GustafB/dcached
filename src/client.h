@@ -1,18 +1,19 @@
 #pragma once
 
-#include "memtable.h"
 #include <map>
+
+#include "memtable.h"
 
 namespace dcached {
 
 class Client {
- public:
+public:
   Client() = default;
   ~Client() = default;
 
   void run_loop();
 
- private:
+private:
   MemTable<std::string, std::string> _memtable;
 };
 

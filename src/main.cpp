@@ -1,7 +1,9 @@
-#include "client.h"
 #include <string>
 
-int main() {
+#include "client.h"
+
+int main()
+{
   dcached::Client client{};
   client.run_loop();
   return 0;
