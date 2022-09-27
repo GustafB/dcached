@@ -53,7 +53,7 @@ private:
 template <typename K, typename V>
 MemTable<K, V>::MemTable()
 {
-  populate_from_log(constants::outdir);
+  // populate_from_log(constants::outdir);
 }
 
 template <typename K, typename V>

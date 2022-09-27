@@ -55,22 +55,20 @@ std::string initialize_log_dir()
 std::string find_current_log(const std::string& log_fmt)
 {
   initialize_log_dir();
-  auto cmpend = log_fmt.find_last_of('_');
-  auto cmpstart = sizeof(dcached::constants::outdir) - 1;
-  auto cmpstr = log_fmt.substr(0, log_fmt.find_last_of('_'));
+  const auto cmpstart = sizeof(dcached::constants::outdir) - 1;
+  const auto cmpstr = log_fmt.substr(0, log_fmt.find_last_of('_'));
   const fs::path system_dir_path{dcached::constants::outdir};
-  int log_file_number = 0;
+  int file_number = 0;
   for (auto& log_file : fs::directory_iterator{system_dir_path}) {
     auto file_name = log_file.path().string();
     auto cmp =
         file_name.substr(cmpstart, file_name.find_last_of('_') - cmpstart);
     if (cmp == cmpstr) {
-      log_file_number =
-          std::max(log_file_number, dcached::util::parse_log_number(file_name));
+      file_number =
+          std::max(file_number, dcached::util::parse_log_number(file_name));
     }
   }
-  return dcached::util::generate_log_file_name(log_fmt.c_str(),
-                                               log_file_number);
+  return dcached::util::generate_log_file_name(log_fmt.c_str(), file_number);
 }
 
 }  // namespace
