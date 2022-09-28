@@ -34,11 +34,9 @@ std::string binary_encode(const char *buf, std::size_t size)
   return bin;
 }
 
-template <typename T,
-          typename = typename std::enable_if<std::is_arithmetic_v<T>>::type>
-std::string binary_encode(T n)
+std::string binary_encode(const std::string &buf)
 {
-  return std::bitset<sizeof(T) * constants::ByteSz>(n).to_string();
+  return binary_encode(buf.c_str(), buf.size());
 }
 
 std::string binary_decode(std::string_view bin)
@@ -47,14 +45,13 @@ std::string binary_decode(std::string_view bin)
   out.reserve(bin.size() / constants::ByteSz);
   for (std::size_t i = 0; i < bin.size(); i += 8) {
     unsigned char c = 0;
-    for (std::size_t j = 0; j < 8 ; ++j) {
+    for (std::size_t j = 0; j < 8; ++j) {
       if (bin[i + j] == '1') c |= 1 << (7 - j);
     }
+
     out.push_back(c);
   }
   return out;
 }
-
-
 
 }  // namespace dcached

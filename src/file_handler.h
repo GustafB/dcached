@@ -82,7 +82,8 @@ public:
                      find_current_log(constants::default_log)}
   {
     _default_log =
-        std::ofstream{_current_log, std::fstream::out | std::fstream::app};
+        std::ofstream{_current_log, std::fstream::out | std::fstream::app |
+                                        std::fstream::binary};
     assert(_default_log.is_open());
   }
 
