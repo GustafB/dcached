@@ -18,9 +18,9 @@ std::ifstream& read_next(std::ifstream& is, std::string& output,
                          std::size_t& file_location)
 {
   constexpr std::size_t uint64_bitsize = sizeof(std::uint64_t) * 8;
-  char size_buf[uint64_bitsize];
+  char size_buf[uint64_bitsize + 1] = {'\0'};
   is.read(size_buf, uint64_bitsize);
-  std::size_t value_size = dcached::binary_decode<std::size_t>({size_buf}) * 8;
+  std::size_t value_size = dcached::binary_decode<std::size_t>(size_buf, uint64_bitsize) * 8;
   is.seekg(file_location += uint64_bitsize, std::ios_base::beg);
   std::string value_buf;
   value_buf.resize(value_size);
@@ -35,6 +35,7 @@ std::vector<char> map_to_vec(T&& container)
 {
   std::vector<char> buffer;
   for (auto& [key, value] : container) {
+    auto bin = create_bin_record(key, value);
     for (char c : key) buffer.push_back(c);
     for (char c : value) buffer.push_back(c);
     buffer.push_back(',');
@@ -42,8 +43,7 @@ std::vector<char> map_to_vec(T&& container)
   return buffer;
 }
 
-std::string create_bin_record(dcached::constants::ACTION action,
-                              const std::string& key,
+std::string create_bin_record(const std::string& key,
                               const std::string& value = "")
 {
   auto key_b = dcached::binary_encode(key);
@@ -65,7 +65,6 @@ public:
   std::optional<V> get(K const& key);
   void set(K const& key, V const& value);
   void del(K const& key);
-
   unsigned long size() const;
 
 private:
@@ -74,7 +73,6 @@ private:
 
   std::map<K, V> _container;
   FileManager _file_handler;
-
   unsigned long _data_size;
 };
 
@@ -87,9 +85,7 @@ MemTable<K, V>::MemTable()
 template <typename K, typename V>
 void MemTable<K, V>::set(K const& key, V const& value)
 {
-  // auto record = util::concatenate(
-  //     std::to_string(static_cast<int>(constants::ACTION::SET)), key, value);
-  auto record = create_bin_record(constants::ACTION::SET, key, value);
+  auto record = create_bin_record(key, value);
   _file_handler.append_to_log(record.c_str(), record.size());
   _container.insert_or_assign(key, value);
 }
@@ -97,7 +93,7 @@ void MemTable<K, V>::set(K const& key, V const& value)
 template <typename K, typename V>
 void MemTable<K, V>::del(K const& key)
 {
-  auto record = create_bin_record(constants::ACTION::SET, key);
+  auto record = create_bin_record(key);
   _file_handler.append_to_log(record.c_str(), record.size());
   _container.erase(key);
 }
@@ -121,8 +117,6 @@ void MemTable<K, V>::dump_to_sstable()
 template <typename K, typename V>
 void MemTable<K, V>::populate_from_log(std::string const& log_path)
 {
-  // THIS NO LONGER WORKS AS WE WRITE BYTES
-  // INSTEAD OF COMMA SEPARATED STRINGS
   std::ifstream is{_file_handler.get_active_wal(),
                    std::ifstream::ate | std::ifstream::binary};
   auto file_size = is.tellg();
@@ -132,20 +126,12 @@ void MemTable<K, V>::populate_from_log(std::string const& log_path)
     std::string key, value;
     read_next(is, key, file_location);
     read_next(is, value, file_location);
-    std::cout << key << " " << value << "\n";
+    if (value.size() > 0) {
+      _container.insert_or_assign(key, value);
+    } else {
+      _container.erase(key);
+    }
   }
-
-  // while (std::getline(is, record, ',')) {
-  //   auto [action, key, value] = util::split_key_value_record(record);
-  //   switch (action) {
-  //     case constants::ACTION::SET:
-  //       _container.insert_or_assign(key, value);
-  //       break;
-  //     case constants::ACTION::DEL:
-  //       _container.erase(key);
-  //       break;
-  //   }
-  // }
 }
 
 template <typename K, typename V>

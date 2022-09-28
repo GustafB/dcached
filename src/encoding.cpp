@@ -7,7 +7,7 @@
 #include <type_traits>
 
 #include "constants.h"
-
+#include <iostream>
 namespace {
 
 std::uint32_t pack_ints(std::uint16_t a, std::uint16_t b)
@@ -24,12 +24,22 @@ std::pair<uint16_t, uint16_t> unpack_ints(std::uint32_t n)
 
 namespace dcached {
 
-std::string binary_encode(const char *buf, std::size_t size)
+std::string binary_decode(const char* bin, std::size_t n)
+{
+  std::string out;
+  out.reserve(n / constants::ByteSz);
+  for (std::size_t i = 0; i < n; i += constants::ByteSz) {
+    out.push_back(binary_decode<unsigned char>(bin + i, constants::ByteSz));
+  }
+  return out;
+}
+
+std::string binary_encode(const char *buf, std::size_t n)
 {
   std::string bin;
-  bin.reserve(size * constants::ByteSz);
-  for (std::size_t i = 0; i < size; ++i) {
-    bin += std::bitset<constants::ByteSz>(buf[i]).to_string();
+  bin.reserve(n * constants::ByteSz);
+  for (std::size_t i = 0; i < n; ++i) {
+    bin += binary_encode<unsigned char>(buf[i]);
   }
   return bin;
 }
@@ -39,19 +49,9 @@ std::string binary_encode(const std::string &buf)
   return binary_encode(buf.c_str(), buf.size());
 }
 
-std::string binary_decode(std::string_view bin)
+std::string binary_decode(const std::string &buf)
 {
-  std::string out;
-  out.reserve(bin.size() / constants::ByteSz);
-  for (std::size_t i = 0; i < bin.size(); i += 8) {
-    unsigned char c = 0;
-    for (std::size_t j = 0; j < 8; ++j) {
-      if (bin[i + j] == '1') c |= 1 << (7 - j);
-    }
-
-    out.push_back(c);
-  }
-  return out;
+  return binary_decode(buf.c_str(), buf.size());
 }
 
 }  // namespace dcached
