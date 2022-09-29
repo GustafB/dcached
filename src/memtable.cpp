@@ -12,8 +12,7 @@
 
 namespace {
 
-std::istream& read_chunk(std::istream& is, std::size_t offset,
-                         std::uint64_t chunk_size, std::string* output)
+std::istream& read_chunk(std::istream& is, std::uint64_t chunk_size, std::string* output)
 {
   output->resize(chunk_size);
   return is.read(&(*output)[0], chunk_size);
@@ -24,14 +23,14 @@ std::istream& read_next(std::istream& is, std::string* output,
 {
   using namespace dcached;
   std::string size_buf;
-  if (!read_chunk(is, *offset, constants::MaxKVSize, &size_buf)) return is;
+  if (!read_chunk(is, constants::MaxKVSize, &size_buf)) return is;
   constants::KVType vsz = dcached::binary_decode<constants::KVType>(
                               size_buf.c_str(), constants::MaxKVSize) *
                           constants::ByteSz;
   is.seekg(*offset += constants::MaxKVSize, std::ios_base::beg);
 
   std::string value_buf;
-  if (!read_chunk(is, *offset, vsz, &value_buf)) return is;
+  if (!read_chunk(is, vsz, &value_buf)) return is;
   is.seekg(*offset += vsz, std::ios_base::beg);
   *output = dcached::binary_decode(value_buf);
   return is;

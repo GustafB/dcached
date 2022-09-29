@@ -7,6 +7,6 @@ project(dcached VERSION 0.0
 set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-add_compile_options(-Wall -Werror -Wno-error=maybe-uninitialized -Wpedantic)
+add_compile_options(-Wall -Werror -Wextra -Wno-error=maybe-uninitialized -Wpedantic)
 
 add_subdirectory(src)

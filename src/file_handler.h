@@ -15,7 +15,6 @@
 
 namespace {
 
-using Record = std::tuple<dcached::constants::ACTION, std::string, std::string>;
 namespace fs = std::filesystem;
 
 std::string initialize_log_dir()
