@@ -14,25 +14,26 @@
 
 namespace {
 
-std::istream& read_chunk(std::istream& is, std::string& output, std::size_t& offset, std::uint64_t chunk_size)
+std::istream& read_chunk(std::istream& is, std::size_t offset, std::uint64_t chunk_size, std::string* output)
 {
-  output.resize(chunk_size);
-  return is.read(&output[0], chunk_size);
+  output->resize(chunk_size);
+  return is.read(&(*output)[0], chunk_size);
 }
 
-std::istream& read_next(std::istream& is, std::string& output,
-                         std::size_t& file_location)
+std::istream& read_next(std::istream& is,
+                        std::string* output,
+                        std::size_t* offset)
 {
   using namespace dcached;
   std::string size_buf;
-  if (!read_chunk(is, size_buf, file_location, constants::MaxKVSize)) return is;
-  constants::KVType vsz = dcached::binary_decode<constants::KVType>(size_buf.c_str(), constants::MaxKVSize) * 8;
-  is.seekg(file_location += constants::MaxKVSize, std::ios_base::beg);
+  if (!read_chunk(is, *offset, constants::MaxKVSize, &size_buf)) return is;
+  constants::KVType vsz = dcached::binary_decode<constants::KVType>(size_buf.c_str(), constants::MaxKVSize) * constants::ByteSz;
+  is.seekg(*offset += constants::MaxKVSize, std::ios_base::beg);
 
   std::string value_buf;
-  if (!read_chunk(is, value_buf, file_location, vsz)) return is;
-  is.seekg(file_location += vsz, std::ios_base::beg);
-  output = dcached::binary_decode(value_buf);
+  if (!read_chunk(is, *offset, vsz, &value_buf)) return is;
+  is.seekg(*offset += vsz, std::ios_base::beg);
+  *output = dcached::binary_decode(value_buf);
   return is;
 }
 
@@ -50,11 +51,12 @@ std::vector<char> map_to_vec(T&& container)
 std::string create_bin_record(const std::string& key,
                               const std::string& value = "")
 {
+  using namespace dcached;
   return dcached::util::concatenate(
-      dcached::binary_encode<dcached::constants::KVType>(key.size()),
-      dcached::binary_encode(key),
-      dcached::binary_encode<dcached::constants::KVType>(value.size()),
-      dcached::binary_encode(value));
+      binary_encode<dcached::constants::KVType>(key.size()),
+      binary_encode(key),
+      binary_encode<dcached::constants::KVType>(value.size()),
+      binary_encode(value));
 }
 
 }  // namespace
@@ -125,8 +127,8 @@ void MemTable<K, V>::populate_from_log(std::string const& log_path)
   std::size_t offset = 0;
   while (is) {
     std::string key, value;
-    read_next(is, key, offset);
-    read_next(is, value, offset);
+    read_next(is, &key, &offset);
+    read_next(is, &value, &offset);
     std::cout << key << " " << value << "\n";
     if (value.size() > 0) {
       _container.insert_or_assign(key, value);
