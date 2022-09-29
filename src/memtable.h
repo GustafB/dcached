@@ -12,17 +12,15 @@
 #include "file_handler.h"
 #include "utility.h"
 
-namespace {
-
-std::istream& read_chunk(std::istream& is, std::size_t offset, std::uint64_t chunk_size, std::string* output)
+inline std::istream& read_chunk(std::istream& is, std::size_t offset, std::uint64_t chunk_size, std::string* output)
 {
   output->resize(chunk_size);
   return is.read(&(*output)[0], chunk_size);
 }
 
-std::istream& read_next(std::istream& is,
-                        std::string* output,
-                        std::size_t* offset)
+inline std::istream& read_next(std::istream& is,
+                               std::string* output,
+                               std::size_t* offset)
 {
   using namespace dcached;
   std::string size_buf;
@@ -38,7 +36,7 @@ std::istream& read_next(std::istream& is,
 }
 
 template <typename T>
-std::vector<char> map_to_vec(T&& container)
+inline std::vector<char> map_to_vec(T&& container)
 {
   std::vector<char> buffer;
   for (auto& [key, value] : container) {
@@ -48,7 +46,7 @@ std::vector<char> map_to_vec(T&& container)
   return buffer;
 }
 
-std::string create_bin_record(const std::string& key,
+inline std::string create_bin_record(const std::string& key,
                               const std::string& value = "")
 {
   using namespace dcached;
@@ -59,7 +57,6 @@ std::string create_bin_record(const std::string& key,
       binary_encode(value));
 }
 
-}  // namespace
 
 namespace dcached {
 

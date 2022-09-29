@@ -11,7 +11,7 @@ constexpr char outdir[]{"/tmp/dcached/"};
 
 constexpr std::size_t ByteSz = 8;
 
-using KVType = std::uint64_t;
+using KVType = std::uint32_t;
 
 constexpr std::size_t MaxKVSize = sizeof(KVType) * ByteSz;
 

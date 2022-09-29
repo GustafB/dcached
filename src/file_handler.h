@@ -18,31 +18,6 @@ namespace {
 using Record = std::tuple<dcached::constants::ACTION, std::string, std::string>;
 namespace fs = std::filesystem;
 
-std::string compact_log(std::string const& old_path,
-                        std::string const& new_path)
-{
-  std::ifstream old_log{old_path};
-  std::ofstream new_log{new_path};
-  std::unordered_map<std::string, Record> map;
-  std::string record;
-  while (std::getline(old_log, record)) {
-    auto [action, key, value] = dcached::util::split_key_value_record(record);
-    switch (action) {
-      case dcached::constants::ACTION::SET:
-        map.emplace(key, std::forward_as_tuple(action, key, value));
-        break;
-      case dcached::constants::ACTION::DEL:
-        map.erase(key);
-        break;
-    }
-  }
-  for (auto& pair : map) {
-    auto [action, key, value] = pair.second;
-    new_log << dcached::util::join_key_value_record(action, key, value);
-  }
-  return "";
-}
-
 std::string initialize_log_dir()
 {
   const fs::path system_dir_path{dcached::constants::outdir};

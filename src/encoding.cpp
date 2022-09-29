@@ -8,19 +8,6 @@
 
 #include "constants.h"
 #include <iostream>
-namespace {
-
-std::uint32_t pack_ints(std::uint16_t a, std::uint16_t b)
-{
-  return (static_cast<std::uint32_t>(a) << 16) | b;
-}
-
-std::pair<uint16_t, uint16_t> unpack_ints(std::uint32_t n)
-{
-  return {static_cast<std::uint16_t>(n >> 16), static_cast<std::uint16_t>(n)};
-}
-
-}  // namespace
 
 namespace dcached {
 
