@@ -2,16 +2,16 @@
 
 #include <bitset>
 #include <cstdint>
+#include <iostream>
 #include <string>
 #include <string_view>
 #include <type_traits>
 
 #include "constants.h"
-#include <iostream>
 
 namespace dcached {
 
-std::string binary_decode(const char* bin, std::size_t n)
+std::string binary_decode(const char *bin, std::size_t n)
 {
   std::string out;
   out.reserve(n / constants::ByteSz);

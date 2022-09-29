@@ -26,4 +26,10 @@ std::string FileManager::roll_wal(const std::string& current_log,
 
 std::string FileManager::get_active_wal() { return _current_log; }
 
+std::ofstream& FileManager::append_buffer(std::vector<char> buf)
+{
+  auto sst = std::ofstream{"/tmp/sstable.log"};
+  return _append_to_file(buf.data(), buf.size(), sst);
+}
+
 }  // namespace dcached

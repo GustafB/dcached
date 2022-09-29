@@ -16,7 +16,7 @@ public:
   void run_loop();
 
 private:
-  MemTable<std::string, std::string> _memtable;
+  MemTable _memtable;
 };
 
 }  // namespace dcached

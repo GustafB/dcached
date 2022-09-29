@@ -28,7 +28,7 @@ T binary_decode(const char *bin, std::size_t n)
   T num = 0;
   short max_bit_index = sizeof(T) * constants::ByteSz - 1;
   for (std::size_t i = 0; i < n; i++) {
-   if (bin[i] == '1') num |= 1 << (max_bit_index - i);
+    if (bin[i] == '1') num |= 1 << (max_bit_index - i);
   }
   return num;
 }
