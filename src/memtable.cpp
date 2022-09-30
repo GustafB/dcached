@@ -31,8 +31,8 @@ void pack_bin_record(const std::string& key, const std::string& value, char* buf
 {
   using namespace dcached;
   std::uint64_t size_pack = pack_u32t_to_u64t(key.size(), value.size());
-  put_buf_u64t(size_pack, buf);
-  buf += sizeof(size_pack);
+  buf = put_buf_u64t(size_pack, buf);
+  // buf += sizeof(size_pack);
   buf = put_buf_string(key, buf);
   put_buf_string(value, buf);
 }

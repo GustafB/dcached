@@ -21,7 +21,6 @@ del key
 ```
 
 ## wip
-- replace manual binary encoding/decoding with a cast based system
 - add programmatic interface for c++
 - add basic tcp interface
 - daemonize client/server
