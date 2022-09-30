@@ -15,7 +15,7 @@ using KVType = std::uint32_t;
 
 constexpr std::size_t MaxKVSize = sizeof(KVType) * ByteSz;
 
-enum class ACTION { SET = 0, GET = 1, DEL = 2, UNKNOWN = -1 };
+enum class ACTION { SET = 0, GET = 1, DEL = 2, DIAG = 3, UNKNOWN = -1 };
 
 }  // namespace constants
 }  // namespace dcached

@@ -1,9 +1,9 @@
 #include "memtable.h"
 
 #include <fstream>
-#include <map>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "constants.h"
@@ -27,26 +27,27 @@ T& size_to_fit(const std::string& key, const std::string& value, T& container)
   return container;
 }
 
-void pack_bin_record(const std::string& key, const std::string& value, char* buf)
+char* pack_bin_record(const std::string& key, const std::string& value,
+                      char* buf)
 {
   using namespace dcached;
   std::uint64_t size_pack = pack_u32t_to_u64t(key.size(), value.size());
   buf = put_buf_u64t(size_pack, buf);
-  // buf += sizeof(size_pack);
   buf = put_buf_string(key, buf);
-  put_buf_string(value, buf);
+  return put_buf_string(value, buf);
 }
 
-// std::vector<char> map_to_vec(std::map<std::string, std::string>&& container)
-// {
-//   std::vector<char> buffer;
-//   for (auto& [key, value] : container) {
-//     size_to_fit(key, value, buffer);
-//     pack_bin_record(key, value, &bin_record[0]);
-//     for (char c : bin_record) buffer.push_back(c);
-//   }
-//   return buffer;
-// }
+std::vector<char> map_to_vec(
+    std::unordered_map<std::string, std::string>&& container)
+{
+  std::vector<char> buffer;
+  for (auto& [key, value] : container) {
+    std::vector<char> bin_record;
+    pack_bin_record(key, value, &bin_record[0]);
+    for (char c : bin_record) buffer.push_back(c);
+  }
+  return buffer;
+}
 
 std::istream& read_next(std::ifstream& is, std::string* key, std::string* value)
 {
@@ -88,19 +89,22 @@ void MemTable::set(std::string const& key, std::string const& value)
   pack_bin_record(key, value, &record[0]);
   _file_handler.append_to_log(record.c_str(), record.size());
   _container.insert_or_assign(key, value);
+  _size += record.size();
 }
 
 void MemTable::del(std::string const& key)
 {
-  std::string record;
-  std::string tombstone = "";
-  record.resize(get_required_sz(key, tombstone));
-  pack_bin_record(key, tombstone, &record[0]);
-  _file_handler.append_to_log(record.c_str(), record.size());
+  const auto record = _container.find(key);
+  if (record == _container.end()) return;
+  std::string tmp, tombstone;
+  tmp.resize(get_required_sz(key, tombstone));
+  pack_bin_record(key, tombstone, &tmp[0]);
+  _file_handler.append_to_log(tmp.c_str(), tmp.size());
+  _size -= record->first.size() + record->second.size();
   _container.erase(key);
 }
 
-std::optional<std::string> MemTable::get(std::string const& key)
+std::optional<std::string> MemTable::get(std::string const& key) const
 {
   auto const iter = _container.find(key);
   return iter != std::end(_container) ? iter->second
@@ -109,25 +113,23 @@ std::optional<std::string> MemTable::get(std::string const& key)
 
 void MemTable::dump_to_sstable()
 {
-  // std::map<std::string, std::string> newmap;
-  // std::swap(_container, newmap);
-  // std::vector<char> buffer = map_to_vec(std::move(newmap));
-  // _file_handler.append_buffer(buffer);
+  std::unordered_map<std::string, std::string> newmap;
+  std::swap(_container, newmap);
+  std::vector<char> buffer = map_to_vec(std::move(newmap));
+  _file_handler.append_buffer(buffer);
 }
 
 void MemTable::populate_from_log(std::string const& log_path)
 {
   std::ifstream is{log_path, std::ifstream::binary};
-  // std::size_t offset = 0;
-  while (is) {
+  while (true) {
     std::string key, value;
-    read_next(is, &key, &value);
-    if (value.size() > 0) {
+    if (!read_next(is, &key, &value))
+      break;
+    else if (value.size() > 0)
       _container.insert_or_assign(key, value);
-    }
-    else {
+    else
       _container.erase(key);
-    }
   }
 }
 
@@ -136,6 +138,15 @@ unsigned long MemTable::size() const
   // TODO: actually track byte size
   // USE: entry.h
   return _container.size();
+}
+
+std::string MemTable::get_diagnostic_data() const
+{
+  std::stringstream ss;
+  ss << "total_key_count: " << _container.size() << "\n"
+     << "total_object_size: " << size() << "\n"
+     << "current_log_file: " << _file_handler.get_active_wal() << "\n";
+  return ss.str();
 }
 
 }  // namespace dcached

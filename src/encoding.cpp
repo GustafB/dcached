@@ -55,9 +55,8 @@ std::pair<uint32_t, uint32_t> unpack_u64t_to_u32t(std::uint64_t n)
   return {static_cast<std::uint32_t>(n >> 32), static_cast<std::uint32_t>(n)};
 }
 
-
 // manual encodiding & decoding
-std::string binary_decode(const char *bin, std::size_t n)
+std::string binary_decode(const char* bin, std::size_t n)
 {
   std::string out;
   out.reserve(n / constants::ByteSz);
@@ -67,7 +66,7 @@ std::string binary_decode(const char *bin, std::size_t n)
   return out;
 }
 
-std::string binary_encode(const char *buf, std::size_t n)
+std::string binary_encode(const char* buf, std::size_t n)
 {
   std::string bin;
   bin.reserve(n * constants::ByteSz);
@@ -77,12 +76,12 @@ std::string binary_encode(const char *buf, std::size_t n)
   return bin;
 }
 
-std::string binary_encode(const std::string &buf)
+std::string binary_encode(const std::string& buf)
 {
   return binary_encode(buf.c_str(), buf.size());
 }
 
-std::string binary_decode(const std::string &buf)
+std::string binary_decode(const std::string& buf)
 {
   return binary_decode(buf.c_str(), buf.size());
 }

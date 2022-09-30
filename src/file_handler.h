@@ -67,10 +67,8 @@ public:
   std::ofstream& append_buffer(std::vector<char> buf);
   std::ofstream& append_to_log(const char* buf, std::size_t buf_sz);
 
-  // read routines
-
   // utils
-  std::string get_active_wal();
+  std::string get_active_wal() const;
 
 private:
   std::ofstream& _append_to_file(const char* buf, std::size_t buf_sz,

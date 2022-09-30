@@ -1,12 +1,12 @@
 #include <bitset>
+#include <cstring>
+#include <iostream>
 #include <string>
 #include <type_traits>
-#include <cstring>
+
 #include "constants.h"
-#include <iostream>
 
 namespace dcached {
-
 
 template <typename T>
 char* put_buf(const T* value, std::size_t size, char* out)
@@ -38,10 +38,10 @@ std::uint64_t pack_u32t_to_u64t(std::uint32_t a, std::uint32_t b);
 
 std::pair<uint32_t, uint32_t> unpack_u64t_to_u32t(std::uint64_t n);
 
-
 // manual encoding
 template <typename T>
-std::size_t encode(const T& value, std::size_t n, char *out) {
+std::size_t encode(const T& value, std::size_t n, char* out)
+{
   std::memcpy(out, &value, 10);
   return n;
 }
@@ -54,7 +54,7 @@ std::string binary_encode(T n)
 }
 
 template <typename T>
-T binary_decode(const char *bin, std::size_t n)
+T binary_decode(const char* bin, std::size_t n)
 {
   static_assert(std::is_arithmetic<T>::value);
   T num = 0;
@@ -66,16 +66,16 @@ T binary_decode(const char *bin, std::size_t n)
 }
 
 template <typename T>
-T binary_decode(const std::string &bin)
+T binary_decode(const std::string& bin)
 {
   return binary_decode<T>(bin.c_str(), bin.size());
 }
 
-std::string binary_encode(const char *buf, std::size_t size);
+std::string binary_encode(const char* buf, std::size_t size);
 
-std::string binary_encode(const std::string &buf);
+std::string binary_encode(const std::string& buf);
 
-std::string binary_decode(const std::string &buf);
+std::string binary_decode(const std::string& buf);
 
-std::string binary_decode(const char *buf, std::size_t n);
+std::string binary_decode(const char* buf, std::size_t n);
 }  // namespace dcached

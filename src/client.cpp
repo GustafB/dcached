@@ -19,6 +19,8 @@ bool validate_args(const std::vector<std::string> &args,
     case dcached::constants::ACTION::DEL:
     case dcached::constants::ACTION::GET:
       return args.size() > 1;
+    case dcached::constants::ACTION::DIAG:
+      return true;
     default:
       return false;
   }
@@ -47,6 +49,8 @@ void Client::run_loop()
         std::cout << _memtable.get(tokens[1]).value_or("value not found")
                   << "\n";
         break;
+      case constants::ACTION::DIAG:
+        std::cout << _memtable.get_diagnostic_data() << "\n";
       default:
         continue;
     }

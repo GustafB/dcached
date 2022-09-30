@@ -18,6 +18,8 @@ char const* actionToString(constants::ACTION action)
       return "GET";
     case constants::ACTION::DEL:
       return "DEL";
+    case constants::ACTION::DIAG:
+      return "DIAG";
     default:
       return "UNKNOWN";
   }
@@ -32,6 +34,8 @@ constants::ACTION charToAction(char c)
       return constants::ACTION::DEL;
     case '2':
       return constants::ACTION::GET;
+    case '3':
+      return constants::ACTION::DIAG;
     default:
       return constants::ACTION::UNKNOWN;
   }
@@ -41,27 +45,11 @@ constants::ACTION stringToAction(std::string str)
 {
   std::transform(str.begin(), str.end(), str.begin(),
                  [](char c) { return std::tolower(c); });
-  return str == "set"   ? constants::ACTION::SET
-         : str == "get" ? constants::ACTION::GET
-         : str == "del" ? constants::ACTION::DEL
-                        : constants::ACTION::UNKNOWN;
-}
-
-std::tuple<constants::ACTION, std::string, std::string> split_key_value_record(
-    std::string const& record)
-{
-  auto action = charToAction(record[0]);
-  auto dpos = record.find('|', 2);
-  auto key = std::string{std::begin(record) + 2, std::begin(record) + dpos};
-  auto value = std::string{std::begin(record) + dpos + 1, std::end(record)};
-  return {action, key, value};
-}
-
-std::string join_key_value_record(constants::ACTION action,
-                                  const std::string& key,
-                                  const std::string& value)
-{
-  return concatenate(actionToString(action), "|", key, "|", value);
+  return str == "set"    ? constants::ACTION::SET
+         : str == "get"  ? constants::ACTION::GET
+         : str == "del"  ? constants::ACTION::DEL
+         : str == "diag" ? constants::ACTION::DIAG
+                         : constants::ACTION::UNKNOWN;
 }
 
 int parse_log_number(const std::string& log_file)

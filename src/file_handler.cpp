@@ -24,7 +24,7 @@ std::string FileManager::roll_wal(const std::string& current_log,
   return util::generate_log_file_name(fmt, util::parse_log_number(current_log));
 }
 
-std::string FileManager::get_active_wal() { return _current_log; }
+std::string FileManager::get_active_wal() const { return _current_log; }
 
 std::ofstream& FileManager::append_buffer(std::vector<char> buf)
 {

@@ -12,12 +12,13 @@ make
 ```
 
 ## CLI interface
-Allows setting, getting and deleting entries as per below:
+Allows setting, getting and deleting entries as per below. `diag` simply prints the current log path and size of the cache.
 ```
 ./dcached.out
 set key value
 get key
 del key
+diag
 ```
 
 ## wip
